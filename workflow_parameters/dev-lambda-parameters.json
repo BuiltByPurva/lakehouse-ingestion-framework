@@ -25,7 +25,7 @@
   },
   {
     "ParameterKey":"FileMetadataCodeLoc",
-    "ParameterValue":"scripts/lambda/file_metadata_to_rds_intern_purva.zip"
+    "ParameterValue":"scripts/lambda/scripts/lambda/file_metadata_to_rds.zip"
   },
   {
     "ParameterKey":"MatchFilePatternName",
@@ -33,7 +33,7 @@
   },
   {
     "ParameterKey":"MatchFilePatternCodeLoc",
-    "ParameterValue":"scripts/lambda/file_metadata_to_rds_intern_purva.zip"
+    "ParameterValue":"scripts/lambda/match_filepattern.zip"
   },
   {
     "ParameterKey":"FilePreprocessingName",
