@@ -54,4 +54,4 @@ jobs:
             --template-body file://infrastructure/etl-lambda-cfn.yml \
             --parameters file://workflow_parameters/dev-lambda-parameters.json \
             --capabilities CAPABILITY_NAMED_IAM \
-            --on-failure DELETE
+            # --on-failure DELETE
