@@ -33,7 +33,17 @@ jobs:
         run: |
           aws cloudformation deploy \
             --template-file infrastructure/etl-sqs-cfn.yml\
-            --stack-name sqs-file-metadata-${{ github.ref_name }} \
-            --parameter-overrides file://${{ github.workspace }}/workflow_parameters/dev-sqs-parameters.json\
+            --stack-name sqs-for-ingestion-intern-purva \
+            --parameter-overrides file://workflow_parameters/dev-sqs-parameters.json\
             --capabilities CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset
+
+            
+      - name: Deploy Lambda Stack
+        run: |
+          aws cloudformation deploy \ 
+          --template-file infrastructure/etl-lambda-cfn.yml \ 
+          --stack-name lambda-for-ingestion-intern-purva \ 
+          --parameter-overrides file://workflow_parameters/dev-lambda-parameters.json \
+          --capabilities CAPABILITY_NAMED_IAM \ 
+          --no-fail-on-empty-changeset
