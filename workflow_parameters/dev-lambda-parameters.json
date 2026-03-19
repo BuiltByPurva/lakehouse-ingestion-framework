@@ -1,0 +1,54 @@
+[
+  {
+    "ParameterKey": "RegionName",
+    "ParameterValue": "us-east-1"
+  },
+  {
+    "ParameterKey": "EnvironmentName",
+    "ParameterValue": "dev"
+  },
+  {
+    "ParameterKey": "S3BucketName",
+    "ParameterValue": "klg-nga-dev-kna-raw-intrnl-purva"
+  },
+  {
+    "ParameterKey": "S3KeyPreproc",
+    "ParameterValue": "scripts/lambda/layer/peproc-lib/preproc_python_lib.zip"
+  },
+  {
+    "ParameterKey": "S3KeyPostgresConn",
+    "ParameterValue": "scripts/lambda/layer/postgres-conn/postgres_conn.zip"
+  },
+  {
+    "ParameterKey":"FileMetadataName",
+    "ParameterValue":"file_metadata_to_rds_intern_purva"
+  },
+  {
+    "ParameterKey":"FileMetadataCodeLoc",
+    "ParameterValue":"scripts/lambda/file_metadata_to_rds_intern_purva.py"
+  },
+  {
+    "ParameterKey":"MatchFilePatternName",
+    "ParameterValue":"match_filepattern_intern_purva"
+  },
+  {
+    "ParameterKey":"MatchFilePatternCodeLoc",
+    "ParameterValue":"scripts/lambda/file_metadata_to_rds_intern_purva.py"
+  },
+  {
+    "ParameterKey":"FilePreprocessingName",
+    "ParameterValue":"file_preproc_intern_purva"
+  },
+  {
+    "ParameterKey":"FilePreprocessingCodeLoc",
+    "ParameterValue":"scripts/lambda/file_preproc.py"
+  },
+  {
+    "ParameterKey":"Runtime",
+    "ParameterValue":"python3.14"
+  },
+  {
+    "ParameterKey":"SecretKeyName",
+    "ParameterValue":"nga-dev-rds-kna"
+  }
+]
