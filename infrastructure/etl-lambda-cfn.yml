@@ -78,6 +78,20 @@ Resources:
         - python3.9
         - python3.10
         - python3.11
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "nga-${EnvironmentName}-etl-service"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
  
   StoreFileMetadataToRDS:
     Type: AWS::Lambda::Function
@@ -104,7 +118,7 @@ Resources:
         - !GetAtt PostgresConnection.LayerVersionArn
       MemorySize: 3008
       # ReservedConcurrentExecutions: 10
-      Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/dev-etl-service"
+      Role:  !Ref LambdaExecutionRole.Arn
       Runtime: !Ref Runtime
       Timeout: 180
      
