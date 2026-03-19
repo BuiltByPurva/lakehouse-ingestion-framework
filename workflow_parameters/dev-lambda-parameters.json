@@ -13,7 +13,7 @@
   },
   {
     "ParameterKey": "S3KeyPreproc",
-    "ParameterValue": "scripts/lambda/layer/peproc-lib/preproc_python_lib.zip"
+    "ParameterValue": "scripts/lambda/layer/preproc-lib/preproc_python_lib.zip"
   },
   {
     "ParameterKey": "S3KeyPostgresConn",
