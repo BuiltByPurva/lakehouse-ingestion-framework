@@ -33,7 +33,7 @@ jobs:
         run: |
           aws cloudformation deploy \
             --template-file infrastructure/etl-sqs-cfn.yml \
-            --stack-name sqs-for-ingestion-intern-purva \
+            --stack-name sqs-for-ingestion \
             --parameter-overrides file://workflow_parameters/dev-sqs-parameters.json \
             --capabilities CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset
@@ -43,7 +43,7 @@ jobs:
         run: |
           aws cloudformation deploy \ 
           --template-file infrastructure/etl-lambda-cfn.yml \ 
-          --stack-name lambda-for-ingestion-intern-purva \ 
+          --stack-name lambda-for-ingestion \ 
           --parameter-overrides file://workflow_parameters/dev-lambda-parameters.json \
           --capabilities CAPABILITY_NAMED_IAM \ 
           --no-fail-on-empty-changeset
