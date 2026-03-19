@@ -1,0 +1,185 @@
+Description: CloudFormation Template for Lambda Function
+Parameters:
+  EnvironmentName:
+    Description: Select the name of Environment
+    Type: String
+    AllowedValues:
+      - dev
+      - qa
+      - prod
+  RegionName:
+    Description: Name of Region
+    Type: String
+  S3BucketName:
+    Description: Name of Bucket in which zip files are stored
+    Type: String
+  S3KeyPreproc:
+    Description: Zip File path stored in S3 Bucket
+    Type: String
+  S3KeyPostgresConn:
+    Description: Zip File path stored in S3 Bucket
+    Type: String
+  FileMetadataName:
+    Description: Lambda function file name which store file metadata in RDS
+    Type: String
+  FileMetadataCodeLoc:
+    Description: Location of file which has code in S3
+    Type: String
+  MatchFilePatternName:
+    Description: Lambda function file name which keep valid file using regex file pattern in RDS
+    Type: String
+  MatchFilePatternCodeLoc:
+    Description: Location of file which has code in S3
+    Type: String
+  FilePreprocessingName:
+    Description: Lambda function file name which preprocessing the files from RDS which are in running state
+    Type: String
+  FilePreprocessingCodeLoc:
+    Description: Location of file which has code in S3
+    Type: String
+  Runtime:
+    Description: Runtime selected to create lambda
+    Type: String
+  SecretKeyName:
+    Description: Key to credentials of RDS
+    Type: String
+  
+ 
+ 
+ 
+Resources:
+  FilePreprocLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: !Sub
+      - "${e}_file_preproc_lib_intern_purva"
+      - e: !Ref EnvironmentName
+      Description: This layer helps to preprocess file and store it in specific folder structure, also has python libraries like pandas, numpy. For e.g, excel -> csv, zip -> unzip
+      Content:
+        S3Bucket: !Ref S3BucketName
+        S3Key: !Ref S3KeyPreproc
+      CompatibleRuntimes:
+        - python3.9
+        - python3.10
+        - python3.11
+     
+ 
+  PostgresConnection:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: !Sub
+      - "${e}_postgres_conn_intern_purva"
+      - e: !Ref EnvironmentName
+      Description: This layer helps to connect postgres rds
+      Content:
+        S3Bucket: !Ref S3BucketName
+        S3Key: !Ref S3KeyPostgresConn
+      CompatibleRuntimes:
+        - python3.9
+        - python3.10
+        - python3.11
+ 
+  StoreFileMetadataToRDS:
+    Type: AWS::Lambda::Function
+    Properties:
+      Architectures:
+        - x86_64
+      Code:
+        S3Bucket: !Ref S3BucketName
+        S3Key: !Ref FileMetadataCodeLoc
+      Description: Function that fetches queue from SQS which has file metadata and store into RDS
+      # Environment:
+      #   Environment
+      EphemeralStorage:
+        Size: 6144
+      FunctionName: !Sub "${EnvironmentName}_kna_${FileMetadataName}"
+      Handler: !Sub "${EnvironmentName}_kna_${FileMetadataName}.lambda_handler"
+      Environment:
+        Variables:
+          AWS_REGION_DEFAULT: !Ref RegionName
+          SECRET_KEY_NAME: !Ref SecretKeyName
+          # STEP_ARN
+          QUEUE_URL: !Sub "${AWS::StackName}-FileMetadataQueue"
+      Layers:
+        - !GetAtt PostgresConnection.LayerVersionArn
+      MemorySize: 6144
+      # ReservedConcurrentExecutions: 10
+      Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/nga-${EnvironmentName}-etl-service"
+      Runtime: !Ref Runtime
+      Timeout: 180
+     
+ 
+ 
+  MatchFilePattern:
+    Type: AWS::Lambda::Function
+    Properties:
+      Architectures:
+        - x86_64
+      Code:
+        S3Bucket: !Ref S3BucketName
+        S3Key: !Ref MatchFilePatternCodeLoc
+      Description: Function that takes files from RDS which are in registered state keep files that match with regex and discard
+ 
+      EphemeralStorage:
+        Size: 6144
+      FunctionName: !Sub "${EnvironmentName}_kna_${MatchFilePatternName}"
+      Handler: !Sub "${EnvironmentName}_kna_${MatchFilePatternName}.lambda_handler"
+ 
+      Layers:
+        - !GetAtt FilePreprocLayer.LayerVersionArn
+        - !GetAtt PostgresConnection.LayerVersionArn
+     
+      MemorySize: 6144
+      # ReservedConcurrentExecutions: 10
+      Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/nga-${EnvironmentName}-etl-lambda-service-role"
+      Runtime: !Ref Runtime
+ 
+      Timeout: 180
+      Environment:
+        Variables:
+          AWS_REGION_DEFAULT: !Ref RegionName
+          SECRET_KEY_NAME: !Ref SecretKeyName
+     
+      
+ 
+  FilePreprocessing:
+    Type: AWS::Lambda::Function
+    Properties:
+      Architectures:
+        - x86_64
+      Code:
+        S3Bucket: !Ref S3BucketName
+        S3Key: !Ref FilePreprocessingCodeLoc
+      Description: Function that takes files from RDS which are in registered state keep files that match with regex and discard
+ 
+      EphemeralStorage:
+        Size: 6144
+      FunctionName: !Sub "${EnvironmentName}_kna_${FilePreprocessingName}"
+      Handler: !Sub "${EnvironmentName}_kna_${FilePreprocessingName}.lambda_handler"
+ 
+      Layers:
+        - !GetAtt FilePreprocLayer.LayerVersionArn
+        - !GetAtt PostgresConnection.LayerVersionArn
+     
+      MemorySize: 6144
+      # ReservedConcurrentExecutions: 10
+      Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/nga-${EnvironmentName}-etl-lambda-service-role"
+      Runtime: !Ref Runtime
+ 
+      Timeout: 180
+      Environment:
+        Variables:
+          AWS_REGION_DEFAULT: !Ref RegionName
+          SECRET_KEY_NAME: !Ref SecretKeyName
+     
+      
+ 
+Outputs:
+  FilePreprocLayerArn:
+    Value: !Ref FilePreprocLayer
+    Export:
+      Name: FilePreprocLayerArn
+  PostgresConnectionArn:
+    Value: !Ref PostgresConnection
+    Export:
+      Name: PostgresConnectionArn
