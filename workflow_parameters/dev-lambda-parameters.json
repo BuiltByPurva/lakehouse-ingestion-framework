@@ -25,7 +25,7 @@
   },
   {
     "ParameterKey":"FileMetadataCodeLoc",
-    "ParameterValue":"scripts/lambda/file_metadata_to_rds_intern_purva.py"
+    "ParameterValue":"scripts/lambda/file_metadata_to_rds_intern_purva.zip"
   },
   {
     "ParameterKey":"MatchFilePatternName",
@@ -33,7 +33,7 @@
   },
   {
     "ParameterKey":"MatchFilePatternCodeLoc",
-    "ParameterValue":"scripts/lambda/file_metadata_to_rds_intern_purva.py"
+    "ParameterValue":"scripts/lambda/file_metadata_to_rds_intern_purva.zip"
   },
   {
     "ParameterKey":"FilePreprocessingName",
@@ -41,7 +41,7 @@
   },
   {
     "ParameterKey":"FilePreprocessingCodeLoc",
-    "ParameterValue":"scripts/lambda/file_preproc.py"
+    "ParameterValue":"scripts/lambda/file_preproc.zip"
   },
   {
     "ParameterKey":"Runtime",

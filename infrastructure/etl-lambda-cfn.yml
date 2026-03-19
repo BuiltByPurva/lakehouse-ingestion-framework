@@ -91,7 +91,7 @@ Resources:
       # Environment:
       #   Environment
       EphemeralStorage:
-        Size: 6144
+        Size: 3008
       FunctionName: !Sub "${EnvironmentName}_kna_${FileMetadataName}"
       Handler: !Sub "${EnvironmentName}_kna_${FileMetadataName}.lambda_handler"
       Environment:
@@ -99,10 +99,11 @@ Resources:
           AWS_REGION_DEFAULT: !Ref RegionName
           SECRET_KEY_NAME: !Ref SecretKeyName
           # STEP_ARN
-          QUEUE_URL: !Sub "${AWS::StackName}-FileMetadataQueue"
+          QUEUE_URL: !ImportValue
+            Fn::Sub: "${AWS::StackName}-FileMetadataQueue"
       Layers:
         - !GetAtt PostgresConnection.LayerVersionArn
-      MemorySize: 6144
+      MemorySize: 3008
       # ReservedConcurrentExecutions: 10
       Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/nga-${EnvironmentName}-etl-service"
       Runtime: !Ref Runtime
@@ -121,7 +122,7 @@ Resources:
       Description: Function that takes files from RDS which are in registered state keep files that match with regex and discard
  
       EphemeralStorage:
-        Size: 6144
+        Size: 3008
       FunctionName: !Sub "${EnvironmentName}_kna_${MatchFilePatternName}"
       Handler: !Sub "${EnvironmentName}_kna_${MatchFilePatternName}.lambda_handler"
  
@@ -129,7 +130,7 @@ Resources:
         - !GetAtt FilePreprocLayer.LayerVersionArn
         - !GetAtt PostgresConnection.LayerVersionArn
      
-      MemorySize: 6144
+      MemorySize: 3008
       # ReservedConcurrentExecutions: 10
       Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/nga-${EnvironmentName}-etl-lambda-service-role"
       Runtime: !Ref Runtime
@@ -153,7 +154,7 @@ Resources:
       Description: Function that takes files from RDS which are in registered state keep files that match with regex and discard
  
       EphemeralStorage:
-        Size: 6144
+        Size: 3008
       FunctionName: !Sub "${EnvironmentName}_kna_${FilePreprocessingName}"
       Handler: !Sub "${EnvironmentName}_kna_${FilePreprocessingName}.lambda_handler"
  
@@ -161,7 +162,7 @@ Resources:
         - !GetAtt FilePreprocLayer.LayerVersionArn
         - !GetAtt PostgresConnection.LayerVersionArn
      
-      MemorySize: 6144
+      MemorySize: 3008
       # ReservedConcurrentExecutions: 10
       Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/nga-${EnvironmentName}-etl-lambda-service-role"
       Runtime: !Ref Runtime

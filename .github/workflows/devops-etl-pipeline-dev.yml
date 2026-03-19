@@ -20,10 +20,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Upload files to S3 
-        run: |
-          aws s3 sync scripts/ s3://${{ secrets.BUCKET_NAME }}/scripts/  
+      - name: Zip all Lambda files
+        run: | 
+          cd scripts/lambda
+            for file in *.py; do
+              zip "${file%.py}.zip" "$file"
+            done
 
+      - name: Upload Lambda Zips
+        run: |
+          aws s3 sync scripts/lambda/ s3://${{ secrets.BUCKET_NAME }}/scripts/lambda/ --exclude "*.py" --size-only
+      
       - name: Validate CloudFormation Template
         run: |
           aws cloudformation validate-template \
