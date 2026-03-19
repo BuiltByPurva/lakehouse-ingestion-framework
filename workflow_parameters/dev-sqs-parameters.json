@@ -1,0 +1,26 @@
+[
+    {
+        "ParameterKey": "EnvironmentName",
+        "ParameterValue": "dev"
+    },
+    {
+        "ParameterKey": "MessageRetentionPeriod",
+        "ParameterValue": "345600"
+    },
+    {   
+        "ParameterKey": "VisibilityTimeout",
+        "ParameterValue": "720"
+    },
+    {
+        "ParameterKey": "DelaySeconds",
+        "ParameterValue": "0"
+    },
+    {
+        "ParameterKey": "MaximumMessageSize",
+        "ParameterValue": "262144"
+    },
+    {
+        "ParameterKey": "ReceiveMessageWaitTimeSeconds",
+        "ParameterValue": "0"
+    }
+]

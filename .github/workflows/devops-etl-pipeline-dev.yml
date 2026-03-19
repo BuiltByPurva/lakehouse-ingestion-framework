@@ -1,0 +1,35 @@
+name: Deploy SQS + EventBridge Stack
+
+on:
+  push:
+    branches:
+      - master
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Validate CloudFormation Template
+        run: |
+          aws cloudformation validate-template \
+            --template-body file://infrastructure/etl-sqs-cfn.yml
+
+      - name: Deploy CloudFormation Stack
+        run: |
+          aws cloudformation deploy \
+            --template-file infrastructure/etl-sqs-cfn.yml\
+            --stack-name sqs-file-metadata-${{ github.ref_name }} \
+            --parameter-overrides file://${{ github.workspace }}/workflow_parameters/dev-sqs-parameters.json\
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset

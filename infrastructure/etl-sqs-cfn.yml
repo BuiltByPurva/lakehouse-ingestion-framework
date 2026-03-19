@@ -1,0 +1,128 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWS SQS Queue Creation for S3 upload event through EB
+
+Parameters:
+  EnvironmentName:
+    Description: Select the name of Environment
+    Type: String
+    AllowedValues:
+      - dev
+      - qa
+      - prod
+  MessageRetentionPeriod:
+    Description: The number of seconds Amazon SQS retains a message.
+    Type: Number
+    Default: 345600 # 4 days
+  VisibilityTimeout:
+    Description: The visibility timeout for the queue.
+    Type: Number
+    Default: 30
+  DelaySeconds:
+    Description: The delay time for messages in seconds.
+    Type: Number
+    Default: 0
+  MaximumMessageSize:
+    Description: The limit of how many bytes a message can contain before Amazon SQS rejects it.
+    Type: Number
+    Default: 262144 # 256 KB
+  ReceiveMessageWaitTimeSeconds:
+    Description: The time for which a ReceiveMessage call waits for a message to arrive.
+    Type: Number
+    Default: 0
+
+Metadata:
+  "AWS::CloudFormation::Interface":
+    ParameterGroups:
+      - Label:
+          default: Stack & Environment Details
+        Parameters:
+          - EnvironmentName
+      - Label:
+          default: SQS Properties
+        Parameters:
+          - MessageRetentionPeriod
+          - VisibilityTimeout
+          - DelaySeconds
+          - MaximumMessageSize
+          - ReceiveMessageWaitTimeSeconds
+Resources:
+  FileMetadataQueue:
+    # UpdatePolicy: AutoScalingRollingUpdate
+    Type: AWS::SQS::Queue
+    DeletionPolicy: Delete
+    Properties:
+      QueueName: !Sub
+        - "${e}_fetch_file_metadata_intern_purva"
+        - e: !Ref EnvironmentName
+      MessageRetentionPeriod: !Ref MessageRetentionPeriod
+      VisibilityTimeout: !Ref VisibilityTimeout
+      DelaySeconds: !Ref DelaySeconds
+      MaximumMessageSize: !Ref MaximumMessageSize
+      ReceiveMessageWaitTimeSeconds: !Ref ReceiveMessageWaitTimeSeconds
+      # Tags:
+      #   - Key: env
+      #     Value: !Ref EnvironmentName
+      #   - Key: codeversion
+      #     Value: !Ref CodeVersion
+      #   - Key: stackname
+      #     Value: !Ref "AWS::StackName"
+      #   - Key: releasename
+      #     Value: !Ref ReleaseName
+      #   - Key: productname
+      #     Value: !Ref ProductName
+
+  FileMetadataQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref FileMetadataQueue
+      PolicyDocument:
+        Id: "SQSAccessPolicy"
+        Statement:
+          - Sid: "AllowAll"
+            Effect: Allow
+            Principal: "*"
+            Action: sqs:*
+            Resource: !GetAtt FileMetadataQueue.Arn
+
+  FileMetadataEBRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: File fetched from S3 when object created
+      Name: !Sub
+        - ${e}_fetch_file_metadata_rule_intern_purva
+        - e: !Ref EnvironmentName
+      EventPattern:
+        detail-type:
+          - Object Created
+        source:
+          - aws.s3
+        detail:
+          bucket:
+            name:
+              - !Sub
+                - klg-nga-${e}-kna-raw-intrnl-purva
+                - e: !Ref EnvironmentName
+          object:
+            key:
+              - prefix: "land/"
+      Targets:
+        - Arn: !GetAtt FileMetadataQueue.Arn
+          Id: FileMetadataQueue
+
+Outputs:
+  FileMetadataQueueOutput:
+    Description: SQS output
+    Value: !Ref FileMetadataQueue
+    Export:
+      Name: !Join ["-", [!Ref "AWS::StackName", FileMetadataQueue]]
+  FileMetadataQueuePolicyOutput:
+    Description: SQS policy output
+    Value: !Ref FileMetadataQueuePolicy
+    Export:
+      Name: !Join ["-", [!Ref "AWS::StackName", FileMetadataQueuePolicy]]
+  FileMetadataEBRuleOutput:
+    Description: Event rule for create object
+    Value: !Ref FileMetadataEBRule
+    Export:
+      Name: !Join ["-", [!Ref "AWS::StackName", FileMetadataEBRule]]
