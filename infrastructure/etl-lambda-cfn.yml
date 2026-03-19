@@ -99,13 +99,12 @@ Resources:
           AWS_REGION_DEFAULT: !Ref RegionName
           SECRET_KEY_NAME: !Ref SecretKeyName
           # STEP_ARN
-          QUEUE_URL: !ImportValue
-            Fn::Sub: "${AWS::StackName}-FileMetadataQueue"
+          QUEUE_URL: !ImportValue "sqs-for-ingestion-FileMetadataQueue"
       Layers:
         - !GetAtt PostgresConnection.LayerVersionArn
       MemorySize: 3008
       # ReservedConcurrentExecutions: 10
-      Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/nga-${EnvironmentName}-etl-service"
+      Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/${EnvironmentName}-etl-service"
       Runtime: !Ref Runtime
       Timeout: 180
      
@@ -132,7 +131,7 @@ Resources:
      
       MemorySize: 3008
       # ReservedConcurrentExecutions: 10
-      Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/nga-${EnvironmentName}-etl-lambda-service-role"
+      Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/${EnvironmentName}-etl-lambda-service-role"
       Runtime: !Ref Runtime
  
       Timeout: 180
@@ -164,7 +163,7 @@ Resources:
      
       MemorySize: 3008
       # ReservedConcurrentExecutions: 10
-      Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/nga-${EnvironmentName}-etl-lambda-service-role"
+      Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/${EnvironmentName}-etl-lambda-service-role"
       Runtime: !Ref Runtime
  
       Timeout: 180
