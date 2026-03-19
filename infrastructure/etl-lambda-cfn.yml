@@ -118,7 +118,7 @@ Resources:
         - !GetAtt PostgresConnection.LayerVersionArn
       MemorySize: 3008
       # ReservedConcurrentExecutions: 10
-      Role:  !Ref LambdaExecutionRole.Arn
+      Role:  !GetAtt LambdaExecutionRole.Arn
       Runtime: !Ref Runtime
       Timeout: 180
      
@@ -145,7 +145,7 @@ Resources:
      
       MemorySize: 3008
       # ReservedConcurrentExecutions: 10
-      Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/${EnvironmentName}-etl-lambda-service-role"
+      Role:  !GetAtt LambdaExecutionRole.Arn
       Runtime: !Ref Runtime
  
       Timeout: 180
@@ -177,7 +177,7 @@ Resources:
      
       MemorySize: 3008
       # ReservedConcurrentExecutions: 10
-      Role:  !Sub "arn:aws:iam::${AWS::AccountId}:role/${EnvironmentName}-etl-lambda-service-role"
+      Role:  !GetAtt LambdaExecutionRole.Arn
       Runtime: !Ref Runtime
  
       Timeout: 180
