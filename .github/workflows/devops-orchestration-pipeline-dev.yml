@@ -23,7 +23,7 @@ jobs:
       - name: Deploy CloudFormation Stack for State Machine
         run: |
           aws cloudformation deploy \
-            --template-file infrastructure/etl-sqs-cfn.yml \
+            --template-file infrastructure/orch-elt-lakehouse-step-function-cfn.yml \
             --stack-name sfn-for-ingestion \
             --parameter-overrides file://orchestration_parameters/dev-lakehouse-orch-step-function-parameters.json \
             # --capabilities CAPABILITY_NAMED_IAM \
