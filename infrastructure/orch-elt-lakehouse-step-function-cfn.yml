@@ -49,22 +49,22 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: "*"
-                
-    IngestionFrameworkState:            
-      Type: AWS::StepFunctions::StateMachine
-      Properties:
-        DefinitionS3Location:
-          Bucket: !Sub
-            - 'klg-nga-${e}-kna-raw-intrnl-purva'
-            - e: !Ref Environment
- 
-          Key: !Sub 'ingestion_framework/orchestration/statemachines/${refLkhOrchFileNm}'
-        RoleArn: !GetAtt StepFunctionExecutionRole.Arn
-        StateMachineName: !Sub
-          - '${e}_orch_${n}'
+
+  IngestionFrameworkState:            
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      DefinitionS3Location:
+        Bucket: !Sub
+          - 'klg-nga-${e}-kna-raw-intrnl-purva'
           - e: !Ref Environment
-            n: !Ref refLkhOrchSMname
-        StateMachineType: STANDARD
+
+        Key: !Sub 'ingestion_framework/orchestration/statemachines/${refLkhOrchFileNm}'
+      RoleArn: !GetAtt StepFunctionExecutionRole.Arn
+      StateMachineName: !Sub
+        - '${e}_orch_${n}'
+        - e: !Ref Environment
+          n: !Ref refLkhOrchSMname
+      StateMachineType: STANDARD
        
 Outputs:
  StateMachineOutPut:
