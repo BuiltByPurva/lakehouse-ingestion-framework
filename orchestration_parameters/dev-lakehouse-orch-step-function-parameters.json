@@ -5,10 +5,10 @@
   },
   {
     "ParameterKey": "refLkhOrchFileNm",
-    "ParameterValue": "lakehouse-orch-framework-intern-purva.yaml"
+    "ParameterValue": "lakehouse-orch-framework.yml"
   },
   {
     "ParameterKey": "refLkhOrchSMname",
-    "ParameterValue": "lakehouse_framework-intern-purva"
+    "ParameterValue": "kna_orch_framework"
   }
 ]

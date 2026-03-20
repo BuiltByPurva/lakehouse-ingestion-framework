@@ -18,16 +18,48 @@ Parameters:
      
  
 Resources:
+  StepFunctionExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "nga-${Environment}-orch-step-functions-service-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+
+      Policies:
+        - PolicyName: StepFunctionExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+
+              # Allow invoking Lambda
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: "*"
+
+              # (Optional but recommended for debugging/logging)
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+                
     IngestionFrameworkState:            
       Type: AWS::StepFunctions::StateMachine
       Properties:
         DefinitionS3Location:
           Bucket: !Sub
-            - 'klg-nga-${e}-kna-raw-intrnl'
+            - 'klg-nga-${e}-kna-raw-intrnl-purva'
             - e: !Ref Environment
  
-          Key: !Sub 'intern_2025/purva/ingestion_framework/orchestration/statemachines/${refLkhOrchFileNm}'
-        RoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/nga-${Environment}-orch-step-functions-service-role
+          Key: !Sub 'ingestion_framework/orchestration/statemachines/${refLkhOrchFileNm}'
+        RoleArn: !GetAtt StepFunctionExecutionRole.Arn
         StateMachineName: !Sub
           - '${e}_orch_${n}'
           - e: !Ref Environment
