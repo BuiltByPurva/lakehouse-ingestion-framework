@@ -1,0 +1,163 @@
+Comment: For lakehouse ingestion framework and store in Iceberg format 
+StartAt: StartJob
+States:
+  StartJob:
+    Type: Task
+    Resource: arn:aws:states:::sns:publish
+    Arguments:
+      Message: '{% ''Job started at '' & $now() %}'
+      Subject: >-
+        {% 'Start of Job - ' & $split($states.context.StateMachine.Id, ':')[-1]
+        %}
+      TopicArn: arn:aws:sns:us-east-1:984285319905:dev_kna_notify
+    Next: GetData
+    Catch:
+      - ErrorEquals:
+          - States.QueryEvaluationError
+          - States.TaskFailed
+          - States.Timeout
+        Next: FailJob
+    Retry:
+      - ErrorEquals:
+          - States.Timeout
+        BackoffRate: 2
+        IntervalSeconds: 1
+        MaxAttempts: 1
+    Output: '{% $states.input %}'
+  FailJob:
+    Type: Task
+    Resource: arn:aws:states:::sns:publish
+    Arguments:
+      Subject: >-
+        {% 'Failure of Job - ' & $split($states.context.StateMachine.Id,
+        ':')[-1] %}
+      Message: >-
+        {% 'Error - ' & $states.input.Error & ', Cause - ' &
+        $parse($states.input.Cause).errorMessage %}
+      TopicArn: arn:aws:sns:us-east-1:984285319905:dev_kna_notify
+    Next: Fail
+  Fail:
+    Type: Fail
+  GetData:
+    Type: Task
+    Resource: arn:aws:states:::lambda:invoke
+    Output: '{% $states.result.Payload %}'
+    Arguments:
+      FunctionName: >-
+        !ImportValue MatchFilePatternArn
+      Payload: '{% $states.input %}'
+    Retry:
+      - ErrorEquals:
+          - Lambda.ServiceException
+          - Lambda.AWSLambdaException
+          - Lambda.SdkClientException
+          - Lambda.TooManyRequestsException
+          - States.Timeout
+        IntervalSeconds: 1
+        MaxAttempts: 1
+        BackoffRate: 2
+        JitterStrategy: FULL
+    Next: Choice
+    Catch:
+      - ErrorEquals:
+          - States.Timeout
+          - States.QueryEvaluationError
+          - States.TaskFailed
+        Next: FailJob
+  Choice:
+    Type: Choice
+    Choices:
+      - Next: Map
+        Condition: '{% $exists($states.input.entries[0]) %}'
+    Default: EndJob
+  Map:
+    Type: Map
+    ItemProcessor:
+      ProcessorConfig:
+        Mode: INLINE
+      StartAt: ProcessingFile
+      States:
+        ProcessingFile:
+          Type: Task
+          Resource: arn:aws:states:::lambda:invoke
+          Output: '{% $states.result.Payload %}'
+          Arguments:
+            FunctionName: >-
+              !ImportValue FilePreprocessingArn
+            Payload:
+              execution_id: '{% $states.context.Execution.Id %}'
+              input: '{% $states.input %}'
+          Retry:
+            - ErrorEquals:
+                - Lambda.ServiceException
+                - Lambda.AWSLambdaException
+                - Lambda.SdkClientException
+                - Lambda.TooManyRequestsException
+              IntervalSeconds: 1
+              MaxAttempts: 3
+              BackoffRate: 2
+              JitterStrategy: FULL
+          Catch:
+            - ErrorEquals:
+                - States.Timeout
+                - States.TaskFailed
+                - States.QueryEvaluationError
+              Next: ProcessFileFail
+          Next: Glue StartJobRun
+        Glue StartJobRun:
+          Type: Task
+          Resource: arn:aws:states:::glue:startJobRun.sync
+          Arguments:
+            JobName: dev_kna_etl
+            Arguments:
+              '--bucket': '{% $states.input.bucket %}'
+              '--s3_key': '{% $states.input.key %}'
+              '--name': '{% $states.input.name %}'
+              '--table_id': '{% $string($states.input.table_id) %}'
+              '--database_nm': '{% $states.input.database_nm %}'
+              '--table_nm': '{% $states.input.table_nm %}'
+              '--scd_type': '{% $string($states.input.scd_type) %}'
+              '--id': '{% $string($states.input.id) %}'
+          End: true
+          Catch:
+            - ErrorEquals:
+                - States.QueryEvaluationError
+                - States.TaskFailed
+              Next: ProcessFileFail
+        ProcessFileFail:
+          Type: Task
+          Resource: arn:aws:states:::sns:publish
+          Arguments:
+            Message: '{% $states.input %}'
+            TopicArn: arn:aws:sns:us-east-1:984285319905:dev_kna_notify
+          Output: '{% {''message'': ''Job Ended successfully''} %}'
+          End: true
+    Items: '{% $states.input.entries %}'
+    MaxConcurrency: 10
+    Next: EndJob
+    Retry:
+      - ErrorEquals:
+          - States.Timeout
+        BackoffRate: 2
+        IntervalSeconds: 1
+        MaxAttempts: 1
+    Catch:
+      - ErrorEquals:
+          - States.TaskFailed
+          - States.QueryEvaluationError
+          - States.Timeout
+        Next: FailJob
+    Output:
+      subject: End of Job
+      message: Job ended successfully
+  EndJob:
+    Type: Task
+    Resource: arn:aws:states:::sns:publish
+    Arguments:
+      Subject: '{% ''End of Job - '' & $split($states.context.StateMachine.Id, '':'')[-1] %}'
+      Message: '{% $states.input.message & '' at '' & $now() %}'
+      TopicArn: arn:aws:sns:us-east-1:984285319905:dev_kna_notify
+    Next: Success
+  Success:
+    Type: Succeed
+QueryLanguage: JSONata

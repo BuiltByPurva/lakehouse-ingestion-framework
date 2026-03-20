@@ -112,7 +112,7 @@ Resources:
         Variables:
           AWS_REGION_DEFAULT: !Ref RegionName
           SECRET_KEY_NAME: !Ref SecretKeyName
-          # STEP_ARN
+          STEP_ARN: !ImportValue "sfn-for-ingestion-IngestionFrameworkState"
           QUEUE_URL: !ImportValue "sqs-for-ingestion-FileMetadataQueue"
       Layers:
         - !GetAtt PostgresConnection.LayerVersionArn
@@ -197,3 +197,20 @@ Outputs:
     Value: !Ref PostgresConnection
     Export:
       Name: PostgresConnectionArn
+  StoreFileMetadataToRDSArn:
+    Description: ARN of StoreFileMetadataToRDS Lambda
+    Value: !GetAtt StoreFileMetadataToRDS.Arn
+    Export:
+      Name: StoreFileMetadataToRDSArn
+
+  MatchFilePatternArn:
+    Description: ARN of MatchFilePattern Lambda
+    Value: !GetAtt MatchFilePattern.Arn
+    Export:
+      Name: MatchFilePatternArn
+
+  FilePreprocessingArn:
+    Description: ARN of FilePreprocessing Lambda
+    Value: !GetAtt FilePreprocessing.Arn
+    Export:
+      Name: FilePreprocessingArn

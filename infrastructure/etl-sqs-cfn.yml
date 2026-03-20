@@ -12,7 +12,7 @@ Parameters:
   MessageRetentionPeriod:
     Description: The number of seconds Amazon SQS retains a message.
     Type: Number
-    Default: 345600 # 4 days
+    Default: 345600 
   VisibilityTimeout:
     Description: The visibility timeout for the queue.
     Type: Number
@@ -24,7 +24,7 @@ Parameters:
   MaximumMessageSize:
     Description: The limit of how many bytes a message can contain before Amazon SQS rejects it.
     Type: Number
-    Default: 262144 # 256 KB
+    Default: 262144 
   ReceiveMessageWaitTimeSeconds:
     Description: The time for which a ReceiveMessage call waits for a message to arrive.
     Type: Number
@@ -47,7 +47,6 @@ Metadata:
           - ReceiveMessageWaitTimeSeconds
 Resources:
   FileMetadataQueue:
-    # UpdatePolicy: AutoScalingRollingUpdate
     Type: AWS::SQS::Queue
     DeletionPolicy: Delete
     Properties:

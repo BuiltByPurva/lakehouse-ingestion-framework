@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: StateMachine Creation
+Parameters:
+  Environment:
+    Description: Select the Environment type as dev, qa or prod
+    Type: String
+    AllowedValues:
+        - dev
+        - qa
+        - pro
+  refLkhOrchFileNm:
+    Description: Lakehouse Orch Framework Step Function File Name
+    Type: String  
+ 
+  refLkhOrchSMname:
+    Description: Lakehouse Orch Framework Step Function File Name
+    Type: String  
+     
+ 
+Resources:
+    IngestionFrameworkState:            
+      Type: AWS::StepFunctions::StateMachine
+      Properties:
+        DefinitionS3Location:
+          Bucket: !Sub
+            - 'klg-nga-${e}-kna-raw-intrnl'
+            - e: !Ref Environment
+ 
+          Key: !Sub 'intern_2025/purva/ingestion_framework/orchestration/statemachines/${refLkhOrchFileNm}'
+        RoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/nga-${Environment}-orch-step-functions-service-role
+        StateMachineName: !Sub
+          - '${e}_orch_${n}'
+          - e: !Ref Environment
+            n: !Ref refLkhOrchSMname
+        StateMachineType: STANDARD
+       
+Outputs:
+ StateMachineOutPut:
+    Description: State Machine Output
+    Value: !Ref IngestionFrameworkState
+    Export:
+      Name: !Join [ "-", [ !Ref "AWS::StackName", IngestionFrameworkState ] ]

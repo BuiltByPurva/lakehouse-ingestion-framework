@@ -1,0 +1,14 @@
+[
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "dev"
+  },
+  {
+    "ParameterKey": "refLkhOrchFileNm",
+    "ParameterValue": "lakehouse-orch-framework-intern-purva.yaml"
+  },
+  {
+    "ParameterKey": "refLkhOrchSMname",
+    "ParameterValue": "lakehouse_framework-intern-purva"
+  }
+]
