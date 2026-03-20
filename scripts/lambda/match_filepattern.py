@@ -8,7 +8,7 @@ from connection import postgres_conn
  
 sqs= boto3.client('sqs')
 url= os.getenv("url")
-SNS_TOPIC_ARN=os.getenv("SNS_TOPIC_ARN")
+# SNS_TOPIC_ARN=os.getenv("SNS_TOPIC_ARN")
 AWS_REGION_DEFAULT=os.getenv("AWS_REGION_DEFAULT")
 SECRET_KEY_NAME= os.getenv("SECRET_KEY_NAME")
 def update_state(conn, id, state, job_id):
