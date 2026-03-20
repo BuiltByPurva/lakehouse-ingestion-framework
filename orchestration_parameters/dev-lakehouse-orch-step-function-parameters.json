@@ -5,7 +5,7 @@
   },
   {
     "ParameterKey": "refLkhOrchFileNm",
-    "ParameterValue": "lakehouse-orch-framework.yml"
+    "ParameterValue": "lakehouse-orchestration-framework.yml"
   },
   {
     "ParameterKey": "refLkhOrchSMname",
